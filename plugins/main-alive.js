@@ -4,57 +4,68 @@ const { runtime } = require('../lib/functions');
 
 cmd({
   pattern: "alive",
-  desc: "Show bot is running",
+  alias: ["status", "botstatus"],
+  desc: "Show bot status information",
   category: "system",
+  react: "⚡",
   filename: __filename
-}, async (Void, m) => {
-  let time = moment.tz('Africa/Nairobi').format('HH:mm:ss');
-  let date = moment.tz('Africa/Nairobi').format('DD/MM/YYYY');
-  let up = runtime(process.uptime());
+}, async (Void, mek, m) => {
+  try {
+    const time = moment.tz('Africa/Nairobi').format('HH:mm:ss');
+    const date = moment.tz('Africa/Nairobi').format('DD/MM/YYYY');
+    const uptime = runtime(process.uptime());
 
-  let message = `
-╭────[ *⚙ PK-XMD IS ALIVE ⚙* ]────╮
-│
-├ 🧿 *Time:* ${time}
-├ 🗓 *Date:* ${date}
-├ 💠 *Uptime:* ${up}
-│
-╰─⭓ *Powered by Pkdriller*
+    // Simple and clean status message
+    const message = `
+⚡ *PK-XMD BOT STATUS* ⚡
+
+🌍 Server Time: ${time}
+📅 Date: ${date}
+⏱️ Uptime: ${uptime}
+
+🔧 Powered by Pkdriller
 `.trim();
 
-  let vcard = {
-    key: {
-      fromMe: false,
-      participant: "0@s.whatsapp.net",
-      ...(m.chat ? { remoteJid: "status@broadcast" } : {})
-    },
-    message: {
-      contactMessage: {
-        displayName: "PK-XMD",
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:PK-XMD\nORG:Verified Bot;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254700000000\nEND:VCARD`
-      }
-    }
-  };
-
-  await Void.sendMessage(m.chat, { text: message }, {
-    quoted: vcard,
-    contextInfo: {
+    // Newsletter context info
+    const contextInfo = {
       externalAdReply: {
-        title: "PK-XMD WhatsApp Bot",
-        body: "Alive & Running - Powered by Pkdriller",
+        title: "PK-XMD • BOT STATUS",
+        body: `Online since ${uptime}`,
+        thumbnailUrl: 'https://files.catbox.moe/fgiecg.jpg',
+        sourceUrl: 'https://github.com/mejjar00254/PK-XMD',
         mediaType: 1,
-        renderLargerThumbnail: false,
-        showAdAttribution: false,
-        sourceUrl: '',
+        renderLargerThumbnail: true
       },
       forwardingScore: 999,
       isForwarded: true,
       forwardedNewsletterMessageInfo: {
         newsletterJid: "120363288304618280@newsletter",
-        serverMessageId: "",
-        newsletterName: "PK-XMD Verified Bot"
+        newsletterName: "PK-XMD Official",
+        serverMessageId: 789
       }
-    }
-  });
+    };
+
+    await Void.sendMessage(
+      m.chat, 
+      {
+        text: message,
+        contextInfo: contextInfo
+      },
+      { 
+        quoted: mek 
+      }
+    );
+
+  } catch (error) {
+    console.error('Alive command error:', error);
+    await Void.sendMessage(
+      m.chat, 
+      { 
+        text: '⚠️ Error showing status. Bot is still running!' 
+      },
+      { 
+        quoted: mek 
+      }
+    );
+  }
 });
-          
